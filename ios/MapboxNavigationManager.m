@@ -2,6 +2,7 @@
 
 @interface RCT_EXTERN_MODULE(MapboxNavigationManager, RCTViewManager)
 
+RCT_EXPORT_VIEW_PROPERTY(onRouteStart, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onLocationChange, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onRouteProgressChange, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onError, RCTDirectEventBlock)
