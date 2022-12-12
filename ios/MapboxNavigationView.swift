@@ -35,6 +35,7 @@ class MapboxNavigationView: UIView, NavigationViewControllerDelegate {
   @objc var mute: Bool = false
   
   @objc var onLocationChange: RCTDirectEventBlock?
+  @objc var onRouteStart: RCTDirectEventBlock?
   @objc var onRouteProgressChange: RCTDirectEventBlock?
   @objc var onError: RCTDirectEventBlock?
   @objc var onCancelNavigation: RCTDirectEventBlock?
@@ -75,7 +76,7 @@ class MapboxNavigationView: UIView, NavigationViewControllerDelegate {
     let destinationWaypoint = Waypoint(coordinate: CLLocationCoordinate2D(latitude: destination[1] as! CLLocationDegrees, longitude: destination[0] as! CLLocationDegrees))
 
     // let options = NavigationRouteOptions(waypoints: [originWaypoint, destinationWaypoint])
-    let options = NavigationRouteOptions(waypoints: [originWaypoint, destinationWaypoint], profileIdentifier: .automobileAvoidingTraffic)
+    let options = NavigationRouteOptions(waypoints: [originWaypoint, destinationWaypoint], profileIdentifier: .automobileAvoidingTraffic, includesSteps: true)
 
     Directions.shared.calculate(options) { [weak self] (_, result) in
       guard let strongSelf = self, let parentVC = strongSelf.parentViewController else {
@@ -89,6 +90,8 @@ class MapboxNavigationView: UIView, NavigationViewControllerDelegate {
           guard let weakSelf = self else {
             return
           }
+          
+          onRouteStart?(["legs": route.legs])
           
           let navigationService = MapboxNavigationService(routeResponse: response, routeIndex: 0, routeOptions: options, simulating: strongSelf.shouldSimulateRoute ? .always : .never)
           
