@@ -1,6 +1,7 @@
 import MapboxCoreNavigation
 import MapboxNavigation
 import MapboxDirections
+import MapboxMaps
 
 // // adapted from https://pspdfkit.com/blog/2017/native-view-controllers-and-react-native/ and https://github.com/mslabenyak/react-native-mapbox-navigation/blob/master/ios/Mapbox/MapboxNavigationView.swift
 extension UIView {
@@ -92,7 +93,7 @@ class MapboxNavigationView: UIView, NavigationViewControllerDelegate {
           
           let navigationService = MapboxNavigationService(routeResponse: response, routeIndex: 0, routeOptions: options, simulating: strongSelf.shouldSimulateRoute ? .always : .never)
           
-          let navigationOptions = NavigationOptions(navigationService: navigationService)
+          let navigationOptions = NavigationOptions(styles: [AventuraDayStyle(), AventuraNightStyle()], navigationService: navigationService)
           let vc = NavigationViewController(for: response, routeIndex: 0, routeOptions: options, navigationOptions: navigationOptions)
 
           vc.showsEndOfRouteFeedback = strongSelf.showsEndOfRouteFeedback
@@ -116,10 +117,23 @@ class MapboxNavigationView: UIView, NavigationViewControllerDelegate {
   
   func navigationViewController(_ navigationViewController: NavigationViewController, didUpdate progress: RouteProgress, with location: CLLocation, rawLocation: CLLocation) {
     onLocationChange?(["longitude": location.coordinate.longitude, "latitude": location.coordinate.latitude])
-    onRouteProgressChange?(["distanceTraveled": progress.distanceTraveled,
-                            "durationRemaining": progress.durationRemaining,
-                            "fractionTraveled": progress.fractionTraveled,
-                            "distanceRemaining": progress.distanceRemaining])
+    /*
+    struct AventuraStep {
+    var instructions: String
+    var distance: Double
+    }
+    var remainingSteps: [AventuraStep] = []
+    for remainingStep in progress.remainingSteps {
+    remainingSteps.append(AventuraStep(instructions: remainingStep.instructions, distance: remainingStep.distance))
+    }
+    */
+    var remainingSteps: [String] = []
+    var distances: [Double] = []
+    for remainingStep in progress.remainingSteps {
+        remainingSteps.append(remainingStep.instructions)
+        distances.append(remainingStep.distance)
+    }
+    onRouteProgressChange?(["currentStep": progress.currentLegProgress.currentStep.instructions, "remainingSteps": remainingSteps, "distances": distances, "stepIndex": progress.legIndex + progress.currentLegProgress.stepIndex])
   }
   
   func navigationViewControllerDidDismiss(_ navigationViewController: NavigationViewController, byCanceling canceled: Bool) {
@@ -133,4 +147,37 @@ class MapboxNavigationView: UIView, NavigationViewControllerDelegate {
     onArrive?(["message": ""]);
     return true;
   }
+}
+
+
+class AventuraNightStyle : NightStyle {
+    private let backgroundColor = #colorLiteral(red: 0, green: 0.1042077616, blue: 0.1785600185, alpha: 1)
+    
+    required init() {
+        super.init()
+        styleType = .night
+    }
+    
+    override func apply() {
+        super.apply()
+        let traitCollection = UIScreen.main.traitCollection
+        
+        TopBannerView.appearance(for: traitCollection).backgroundColor = backgroundColor
+        InstructionsBannerView.appearance(for: traitCollection).backgroundColor = backgroundColor
+        BottomBannerView.appearance(for: traitCollection).backgroundColor = backgroundColor
+        BottomPaddingView.appearance(for: traitCollection).backgroundColor = backgroundColor
+        FloatingButton.appearance(for: traitCollection).backgroundColor = backgroundColor
+    }
+    
+}
+
+
+class AventuraDayStyle : AventuraNightStyle {
+    private let backgroundColor = #colorLiteral(red: 0, green: 0.1042077616, blue: 0.1785600185, alpha: 1)
+    
+    required init() {
+        super.init()
+        mapStyleURL = URL(string: StyleURI.navigationDay.rawValue)!
+        styleType = .day
+    }
 }

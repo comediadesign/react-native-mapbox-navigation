@@ -19,6 +19,12 @@ type OnRouteProgressChangeEvent = {
   };
 };
 
+type OnRouteStartEvent = {
+  nativeEvent?: {
+    legs: any;
+  };
+};
+
 type OnErrorEvent = {
   nativeEvent?: {
     message?: string;
@@ -30,6 +36,7 @@ export interface IMapboxNavigationProps {
   destination: Coordinate;
   shouldSimulateRoute?: boolean;
   onLocationChange?: (event: OnLocationChangeEvent) => void;
+  onRouteStart?: (event: OnRouteStartEvent) => void;
   onRouteProgressChange?: (event: OnRouteProgressChangeEvent) => void;
   onError?: (event: OnErrorEvent) => void;
   onCancelNavigation?: () => void;
