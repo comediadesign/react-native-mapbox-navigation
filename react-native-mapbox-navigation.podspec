@@ -63,6 +63,7 @@ Pod::Spec.new do |s|
   s.authors      = { "CoMedia Design" => "ben@comediadesign.com" }
   s.platforms    = { :ios => "12.0" }
   s.source       = { :git => "https://github.com/comediadesign/react-native-mapbox-navigation.git", :tag => "#{s.version}" }
+  s.ios.deployment_target  = '12.0'
 
   s.source_files = "ios/**/*.{h,m,swift}"
   s.requires_arc = true
