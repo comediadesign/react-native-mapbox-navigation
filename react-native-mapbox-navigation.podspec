@@ -9,6 +9,11 @@ $RNMBNAV = Object.new
 
 def $RNMBNAV.post_install(installer)
   installer.pod_targets.each do |pod|
+    if pod.name.start_with?('react-native-') || pod.name.start_with?('ReactNative') || pod.name.start_with?('RN') || pod.name.eql?('RNPermissions') || pod.name.start_with?('Permission-')
+      def pod.build_type;
+        Pod::BuildType.static_library
+      end
+    end
     if TargetsToChangeToDynamic.include?(pod.name)
       if pod.send(:build_type) != Pod::BuildType.dynamic_framework
         pod.instance_variable_set(:@build_type,Pod::BuildType.dynamic_framework)
