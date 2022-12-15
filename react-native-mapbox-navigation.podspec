@@ -61,15 +61,15 @@ Pod::Spec.new do |s|
   s.homepage     = "https://github.com/comediadesign/react-native-mapbox-navigation.git"
   s.license    = { :type => "MIT", :file => "LICENSE" }
   s.authors      = { "CoMedia Design" => "ben@comediadesign.com" }
-  s.platforms    = { :ios => "12.0" }
+  s.platforms    = { :ios => "13.0" }
   s.source       = { :git => "https://github.com/comediadesign/react-native-mapbox-navigation.git", :tag => "#{s.version}" }
-  s.ios.deployment_target  = '12.0'
+  s.ios.deployment_target  = '13.0'
 
   s.source_files = "ios/**/*.{h,m,swift}"
   s.requires_arc = true
 
   s.dependency "React-Core"
-  s.dependency "MapboxNavigation", "~> 2.8.0"
+  s.dependency "MapboxNavigation", "~> 2.9.0"
 end
 
 
