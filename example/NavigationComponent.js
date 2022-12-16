@@ -13,6 +13,7 @@ const Navigation = props => {
           shouldSimulateRoute={true}
           origin={origin}
           destination={destination}
+          mute={true}
           hideStatusView
           onLocationChange={event => {
             console.log('onLocationChange', event.nativeEvent);

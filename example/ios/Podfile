@@ -5,6 +5,7 @@ platform :ios, '13.0'
 install! 'cocoapods', :disable_input_output_paths => true
 
 target 'BasicApp' do
+  use_frameworks!
   config = use_native_modules!
   pod 'react-native-mapbox-navigation', :path => '../../', :inhibit_warnings => false
   $ReactNativeMapboxGLIOSVersion = '~> 8.5.0'
@@ -14,6 +15,7 @@ target 'BasicApp' do
     # to enable hermes on iOS, change `false` to `true` and then install pods
     :hermes_enabled => false
   )
+
 
   pre_install do |installer|
     $RNMBNAV.pre_install(installer)
