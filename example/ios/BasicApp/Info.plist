@@ -59,6 +59,6 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 	<key>MBXAccessToken</key>
-	<string>&lt;INSERT MAPBOX TOKEN&gt;</string>
+	<string>pk.eyJ1IjoiYm9lcnRlbCIsImEiOiJjbDk2a2t5eDMwMDVlM25tdzlncXZtdmRlIn0.8JXOjVTsyl_fB7XUQLbp9A</string>
 </dict>
 </plist>

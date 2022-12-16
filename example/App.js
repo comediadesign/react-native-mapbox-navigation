@@ -14,8 +14,8 @@ const App = () => {
   return (
     <SafeAreaView style={backgroundStyle}>
       <NavigationComponent
-        origin={[-105.140629, 39.760194]}
-        destination={[-105.156544, 39.761801]}
+        origin={[-122.4020666, 37.7861745]}
+        destination={[-122.4694143, 37.7546482]}
       />
     </SafeAreaView>
   );

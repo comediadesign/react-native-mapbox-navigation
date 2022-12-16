@@ -21,6 +21,7 @@ class MapboxNavigationView: UIView, NavigationViewControllerDelegate {
   weak var navViewController: NavigationViewController?
   var embedded: Bool
   var embedding: Bool
+  var options: NavigationRouteOptions?
   
   @objc var origin: NSArray = [] {
     didSet { setNeedsLayout() }
@@ -30,10 +31,12 @@ class MapboxNavigationView: UIView, NavigationViewControllerDelegate {
     didSet { setNeedsLayout() }
   }
   
+  @objc var route: NSString = ""
   @objc var shouldSimulateRoute: Bool = false
   @objc var showsEndOfRouteFeedback: Bool = false
   @objc var hideStatusView: Bool = false
-  @objc var mute: Bool = false
+  @objc var mute: Bool = true
+  @objc var showsReportFeedback: Bool = false
   
   @objc var onLocationChange: RCTDirectEventBlock?
   @objc var onRouteProgressChange: RCTDirectEventBlock?
@@ -74,45 +77,78 @@ class MapboxNavigationView: UIView, NavigationViewControllerDelegate {
 
     let originWaypoint = Waypoint(coordinate: CLLocationCoordinate2D(latitude: origin[1] as! CLLocationDegrees, longitude: origin[0] as! CLLocationDegrees))
     let destinationWaypoint = Waypoint(coordinate: CLLocationCoordinate2D(latitude: destination[1] as! CLLocationDegrees, longitude: destination[0] as! CLLocationDegrees))
+    
+    self.options = NavigationRouteOptions(waypoints: [originWaypoint, destinationWaypoint], profileIdentifier: .automobileAvoidingTraffic)
+    
+    let decoder = JSONDecoder()
+    decoder.userInfo[.options] = self.options
 
-    // let options = NavigationRouteOptions(waypoints: [originWaypoint, destinationWaypoint])
-    let options = NavigationRouteOptions(waypoints: [originWaypoint, destinationWaypoint], profileIdentifier: .automobileAvoidingTraffic)
-
-    Directions.shared.calculate(options) { [weak self] (_, result) in
-      guard let strongSelf = self, let parentVC = strongSelf.parentViewController else {
-        return
-      }
-      
-      switch result {
+    let decodedRoute: Route? = try? decoder.decode(Route.self, from: route.data(using: String.Encoding.utf8.rawValue)!)
+    
+    if let decodedRoute = decodedRoute {
+      let routeResponse = RouteResponse(
+        httpResponse: nil,
+        identifier: "deserialize-route",
+        routes: [decodedRoute],
+        waypoints: [originWaypoint, destinationWaypoint],
+        options: .route(self.options!),
+        credentials: Directions.shared.credentials
+      )
+      self.afterRoute(routeResponse: routeResponse)
+    } else {
+      Directions.shared.calculate(self.options!) { [weak self] (_, result) in
+        guard let strongSelf = self else {
+          return
+        }
+        
+        switch result {
         case .failure(let error):
           strongSelf.onError!(["message": error.localizedDescription])
-        case .success(let response):
-          guard let weakSelf = self else {
-            return
-          }
-          
-          let navigationService = MapboxNavigationService(routeResponse: response, routeIndex: 0, routeOptions: options, simulating: strongSelf.shouldSimulateRoute ? .always : .never)
-          
-          let navigationOptions = NavigationOptions(styles: [AventuraDayStyle(), AventuraNightStyle()], navigationService: navigationService)
-          let vc = NavigationViewController(for: response, routeIndex: 0, routeOptions: options, navigationOptions: navigationOptions)
-
-          vc.showsEndOfRouteFeedback = strongSelf.showsEndOfRouteFeedback
-          StatusView.appearance().isHidden = strongSelf.hideStatusView
-
-          NavigationSettings.shared.voiceMuted = strongSelf.mute;
-          
-          vc.delegate = strongSelf
+        case .success(let routeResponse):
+          strongSelf.afterRoute(routeResponse: routeResponse)
+        }
         
-          parentVC.addChild(vc)
-          strongSelf.addSubview(vc.view)
-          vc.view.frame = strongSelf.bounds
-          vc.didMove(toParent: parentVC)
-          strongSelf.navViewController = vc
+        strongSelf.embedding = false
+        strongSelf.embedded = true
       }
-      
-      strongSelf.embedding = false
-      strongSelf.embedded = true
     }
+  }
+  
+  private func afterRoute(routeResponse: RouteResponse) {
+    guard let parentVC = self.parentViewController else {
+      return
+    }
+    let indexedRouteResponse = IndexedRouteResponse(routeResponse: routeResponse, routeIndex: 0)
+    let navigationService = MapboxNavigationService(
+      indexedRouteResponse: indexedRouteResponse,
+      customRoutingProvider: NavigationSettings.shared.directions,
+      credentials: NavigationSettings.shared.directions.credentials,
+      simulating: self.shouldSimulateRoute ? .always : .onPoorGPS
+    )
+    
+    let navigationOptions = NavigationOptions(
+      styles: [AventuraDayStyle(), AventuraNightStyle()],
+      navigationService: navigationService
+    )
+    
+    let vc = NavigationViewController(
+      for: indexedRouteResponse,
+      navigationOptions: navigationOptions
+    )
+
+    vc.showsEndOfRouteFeedback = self.showsEndOfRouteFeedback
+    vc.showsReportFeedback = self.showsReportFeedback
+    StatusView.appearance().isHidden = self.hideStatusView
+
+    NavigationSettings.shared.voiceMuted = self.mute;
+    
+    vc.delegate = self
+  
+    parentVC.addChild(vc)
+    self.addSubview(vc.view)
+    vc.view.frame = self.bounds
+    vc.didMove(toParent: parentVC)
+    self.navViewController = vc
   }
   
   func navigationViewController(_ navigationViewController: NavigationViewController, didUpdate progress: RouteProgress, with location: CLLocation, rawLocation: CLLocation) {

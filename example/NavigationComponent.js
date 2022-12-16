@@ -2,6 +2,8 @@ import React from 'react';
 import {StyleSheet, View} from 'react-native';
 import MapboxNavigation from '@comediadesign/react-native-mapbox-navigation';
 
+import route from './route.json';
+
 const Navigation = props => {
   const {origin, destination} = props;
 
@@ -10,16 +12,17 @@ const Navigation = props => {
       <View style={styles.mapContainer}>
         <MapboxNavigation
           showsEndOfRouteFeedback={true}
-          shouldSimulateRoute={true}
+          shouldSimulateRoute={false}
           origin={origin}
           destination={destination}
+          route={JSON.stringify(route)}
           mute={true}
           hideStatusView
           onLocationChange={event => {
-            console.log('onLocationChange', event.nativeEvent);
+            //console.log('onLocationChange', event.nativeEvent);
           }}
           onRouteProgressChange={event => {
-            console.log('onRouteProgressChange', event.nativeEvent);
+            //console.log('onRouteProgressChange', event.nativeEvent);
           }}
           onError={event => {
             const {message} = event.nativeEvent;

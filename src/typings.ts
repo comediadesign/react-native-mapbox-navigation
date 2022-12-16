@@ -34,6 +34,7 @@ type OnErrorEvent = {
 export interface IMapboxNavigationProps {
   origin: Coordinate;
   destination: Coordinate;
+  route?: string;
   shouldSimulateRoute?: boolean;
   onLocationChange?: (event: OnLocationChangeEvent) => void;
   onRouteStart?: (event: OnRouteStartEvent) => void;
@@ -43,5 +44,6 @@ export interface IMapboxNavigationProps {
   onArrive?: () => void;
   showsEndOfRouteFeedback?: boolean;
   hideStatusView?: boolean;
+  showsReportFeedback?: boolean;
   mute?: boolean;
 }
