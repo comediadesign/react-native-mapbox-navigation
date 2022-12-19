@@ -169,7 +169,15 @@ class MapboxNavigationView: UIView, NavigationViewControllerDelegate {
         remainingSteps.append(remainingStep.instructions)
         distances.append(remainingStep.distance)
     }
-    onRouteProgressChange?(["currentStep": progress.currentLegProgress.currentStep.instructions, "remainingSteps": remainingSteps, "distances": distances, "stepIndex": progress.legIndex + progress.currentLegProgress.stepIndex])
+    onRouteProgressChange?([
+      "durationRemaining": progress.durationRemaining,
+      "distanceRemaining": progress.distanceRemaining,
+      "fractionTraveled": progress.fractionTraveled,
+      "currentStep": progress.currentLegProgress.currentStep.instructions,
+      "remainingSteps": remainingSteps,
+      "distances": distances,
+      "stepIndex": progress.legIndex + progress.currentLegProgress.stepIndex
+    ])
   }
   
   func navigationViewControllerDidDismiss(_ navigationViewController: NavigationViewController, byCanceling canceled: Bool) {
