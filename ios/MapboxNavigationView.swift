@@ -153,29 +153,11 @@ class MapboxNavigationView: UIView, NavigationViewControllerDelegate {
   
   func navigationViewController(_ navigationViewController: NavigationViewController, didUpdate progress: RouteProgress, with location: CLLocation, rawLocation: CLLocation) {
     onLocationChange?(["longitude": location.coordinate.longitude, "latitude": location.coordinate.latitude])
-    /*
-    struct AventuraStep {
-    var instructions: String
-    var distance: Double
-    }
-    var remainingSteps: [AventuraStep] = []
-    for remainingStep in progress.remainingSteps {
-    remainingSteps.append(AventuraStep(instructions: remainingStep.instructions, distance: remainingStep.distance))
-    }
-    */
-    var remainingSteps: [String] = []
-    var distances: [Double] = []
-    for remainingStep in progress.remainingSteps {
-        remainingSteps.append(remainingStep.instructions)
-        distances.append(remainingStep.distance)
-    }
     onRouteProgressChange?([
+      "distanceTraveled": progress.distanceTraveled,
       "durationRemaining": progress.durationRemaining,
       "distanceRemaining": progress.distanceRemaining,
       "fractionTraveled": progress.fractionTraveled,
-      "currentStep": progress.currentLegProgress.currentStep.instructions,
-      "remainingSteps": remainingSteps,
-      "distances": distances,
       "stepIndex": progress.legIndex + progress.currentLegProgress.stepIndex
     ])
   }
