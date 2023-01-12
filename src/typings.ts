@@ -46,4 +46,5 @@ export interface IMapboxNavigationProps {
   hideStatusView?: boolean;
   showsReportFeedback?: boolean;
   mute?: boolean;
+  measurementSystem?: "imperial" | "metric";
 }

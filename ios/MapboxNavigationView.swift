@@ -37,6 +37,7 @@ class MapboxNavigationView: UIView, NavigationViewControllerDelegate {
   @objc var hideStatusView: Bool = false
   @objc var mute: Bool = true
   @objc var showsReportFeedback: Bool = false
+  @objc var measurementSystem: NSString = ""
   
   @objc var onLocationChange: RCTDirectEventBlock?
   @objc var onRouteProgressChange: RCTDirectEventBlock?
@@ -79,6 +80,11 @@ class MapboxNavigationView: UIView, NavigationViewControllerDelegate {
     let destinationWaypoint = Waypoint(coordinate: CLLocationCoordinate2D(latitude: destination[1] as! CLLocationDegrees, longitude: destination[0] as! CLLocationDegrees))
     
     self.options = NavigationRouteOptions(waypoints: [originWaypoint, destinationWaypoint], profileIdentifier: .automobileAvoidingTraffic)
+    if self.measurementSystem == "metric" {
+        self.options.distanceMeasurementSystem = RouteOptions.Unit.metric
+    } else if self.measurementSystem == "imperial" {
+        self.options.distanceMeasurementSystem = RouteOptions.Unit.imperial
+    }
     
     let decoder = JSONDecoder()
     decoder.userInfo[.options] = self.options
