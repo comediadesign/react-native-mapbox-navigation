@@ -9,6 +9,8 @@ type OnLocationChangeEvent = {
     latitude: number;
     longitude: number;
     roadName: string;
+    speed: number;
+    bearing: number;
   };
 };
 
@@ -29,9 +31,10 @@ type OnRouteChangeEvent = {
 type OnRouteProgressChangeEvent = {
   nativeEvent?: {
     distanceTraveled: number;
-    durationRemaining: number;
-    fractionTraveled: number;
     distanceRemaining: number;
+    timeTraveled: number;
+    timeRemaining: number;
+    progress: number;
   };
 };
 
@@ -66,6 +69,7 @@ export interface IMapboxNavigationFreeDriveProps {
   onLocationChange?: (event: OnLocationChangeEvent) => void;
   onTrackingStateChange?: (event: OnTrackingStateChangeEvent) => void;
   onRouteChange?: (event: OnRouteChangeEvent) => void;
+  onRouteProgressChange?: (event: OnRouteProgressChangeEvent) => void;
   onError?: (event: OnErrorEvent) => void;
   onManeuverSizeChange?: (event: OnManeuverSizeChangeEvent) => void;
   showSpeedLimit?: boolean;

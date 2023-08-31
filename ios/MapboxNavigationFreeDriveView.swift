@@ -27,6 +27,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
   @objc var onError: RCTDirectEventBlock?
   @objc var onTrackingStateChange: RCTDirectEventBlock?
   @objc var onRouteChange: RCTDirectEventBlock?
+  @objc var onRouteProgressChange: RCTDirectEventBlock?
   @objc var onManeuverSizeChange: RCTDirectEventBlock?
   @objc var showSpeedLimit: Bool = true {
     didSet {
@@ -290,7 +291,11 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
       fetchRoutes(routeWaypoints: routeWaypoints, routeWaypointNames: routeWaypointNames, onSuccess: {(routes: [Route]) -> Void in
         self.moveToOverview(padding: padding)
         self.previewRoutes(routes: routes, padding: self.getPadding(padding: padding, useDefault: false))
-        self.onRouteChange?(["distance": routes.first?.distance ?? 0, "expectedTravelTime": routes.first?.expectedTravelTime ?? 0, "typicalTravelTime": routes.first?.typicalTravelTime ?? 0])
+        self.onRouteChange?([
+          "distance": routes.first?.distance ?? 0,
+          "expectedTravelTime": routes.first?.expectedTravelTime ?? 0,
+          "typicalTravelTime": routes.first?.typicalTravelTime ?? 0
+        ])
       })
     }
   }
@@ -364,7 +369,11 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
 
       fetchRoutes(routeWaypoints: routeWaypoints, routeWaypointNames: routeWaypointNames, onSuccess: {(routes: [Route]) -> Void in
         self.currentActiveRoutes = routes
-        self.onRouteChange?(["distance": routes.first?.distance ?? 0, "expectedTravelTime": routes.first?.expectedTravelTime ?? 0, "typicalTravelTime": routes.first?.typicalTravelTime ?? 0])
+        self.onRouteChange?([
+          "distance": routes.first?.distance ?? 0,
+          "expectedTravelTime": routes.first?.expectedTravelTime ?? 0,
+          "typicalTravelTime": routes.first?.typicalTravelTime ?? 0
+        ])
 
         self.startActiveGuidance(padding: self.getPadding(padding: padding, useDefault: false), updateCamera: false)
         self.setToFollow(padding: self.getPadding(padding: padding, useDefault: false))
@@ -397,7 +406,13 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
     speedLimitView?.speedLimit = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.speedLimitKey] as? Measurement<UnitSpeed>
     speedLimitView?.currentSpeed = location.speed
 
-    onLocationChange?(["longitude": location.coordinate.longitude, "latitude": location.coordinate.latitude, "roadName": roadName])
+    onLocationChange?([
+      "longitude": location.coordinate.longitude,
+      "latitude": location.coordinate.latitude,
+      "roadName": roadName,
+      "speed": location.speed,
+      "bearing": location.course
+    ])
   }
 
   @objc func progressDidChange(_ notification: Notification) {
@@ -435,6 +450,22 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
     // without redrawing the main route.
     navigationMapView?.updateRouteLine(routeProgress: routeProgress, coordinate: location.coordinate, shouldRedraw: routeProgress.legIndex != currentLegIndex)
     currentLegIndex = routeProgress.legIndex
+
+    onRouteProgressChange?([
+      "distanceTraveled": routeProgress.distanceTraveled ?? 0,
+      "distanceRemaining": routeProgress.distanceRemaining ?? 0,
+      "timeTraveled": 0,
+      "timeRemaining": routeProgress.durationRemaining ?? 0,
+      "progress": routeProgress.fractionTraveled ?? 0
+    ])
+
+    onLocationChange?([
+      "longitude": location.coordinate.longitude,
+      "latitude": location.coordinate.latitude,
+      "roadName": roadName,
+      "speed": location.speed,
+      "bearing": location.course
+    ])
   }
   
   @objc func updateInstructionsBanner(notification: Notification) {
@@ -461,6 +492,12 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
       coordinate: navigationService.router.location?.coordinate,
       shouldRedraw: true
     )
+
+    self.onRouteChange?([
+      "distance": navigationService.routeProgress.route?.distance ?? 0,
+      "expectedTravelTime": navigationService.routeProgress.route??.expectedTravelTime ?? 0,
+      "typicalTravelTime": navigationService.routeProgress.route??.typicalTravelTime ?? 0
+    ])
   }
     
   @objc func refresh(_ notification: Notification) {
@@ -472,6 +509,12 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
       coordinate: navigationService.router.location?.coordinate,
       shouldRedraw: true
     )
+
+    self.onRouteChange?([
+      "distance": navigationService.routeProgress.route?.distance ?? 0,
+      "expectedTravelTime": navigationService.routeProgress.route??.expectedTravelTime ?? 0,
+      "typicalTravelTime": navigationService.routeProgress.route??.typicalTravelTime ?? 0
+    ])
   }
 
   @objc func navigationCameraStateDidChange(_ notification: Notification) {
@@ -851,6 +894,7 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
     navigationMapView.mapView.location.overrideLocationProvider(with: passiveLocationProvider)
     
     passiveLocationProvider.startUpdatingLocation()
+    passiveLocationProvider.startUpdatingHeading()
 
     NotificationCenter.default.addObserver(
       self,

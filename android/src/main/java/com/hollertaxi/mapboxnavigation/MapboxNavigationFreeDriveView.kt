@@ -417,6 +417,15 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             val event = Arguments.createMap()
             event.putDouble("longitude", enhancedLocation.longitude)
             event.putDouble("latitude", enhancedLocation.latitude)
+
+            if (enhancedLocation.hasBearing()) {
+                event.putFloat("bearing", enhancedLocation.getBearing())
+            }
+
+            if (enhancedLocation.hasSpeed()) {
+                event.putFloat("speed", enhancedLocation.getSpeed())
+            }
+
             context
                 .getJSModule(RCTEventEmitter::class.java)
                 .receiveEvent(id, "onLocationChange", event)
@@ -462,7 +471,19 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
                 binding.maneuverContainer.visibility = View.VISIBLE
                 binding.maneuverContainer.findViewById<MapboxManeuverView>(R.id.maneuverView).renderManeuvers(maneuvers)
             }
-        )  
+        )
+
+        // route progress change event
+        val event = Arguments.createMap()
+        event.putFloat("distanceTraveled", routeProgress.distanceTraveled)
+        event.putFloat("distanceRemaining", routeProgress.distanceRemaining)
+        event.putDouble("timeTraveled", 0)
+        event.putDouble("timeRemaining", routeProgress.durationRemaining)
+        event.putFloat("progress", routeProgress.fractionTraveled)
+
+        context
+            .getJSModule(RCTEventEmitter::class.java)
+            .receiveEvent(id, "onRouteProgressChange", event)
     }
 
     /**
@@ -512,6 +533,16 @@ class MapboxNavigationFreeDriveView(private val context: ThemedReactContext, pri
             viewportDataSource.evaluate()
             navigationCamera.requestNavigationCameraToOverview()
         }
+
+        // route change event
+        val event = Arguments.createMap()
+        event.putDouble("distance", routeUpdateResult.routes.first().distance())
+        event.putDouble("expectedTravelTime", routeUpdateResult.routes.first().duration())
+        event.putDouble("typicalTravelTime", routeUpdateResult.routes.first().durationTypical())
+
+        context
+            .getJSModule(RCTEventEmitter::class.java)
+            .receiveEvent(id, "onRouteChange", event)
     }
 
     private val onPositionChangedListener = OnIndicatorPositionChangedListener { point ->

@@ -5,6 +5,7 @@
 RCT_EXPORT_VIEW_PROPERTY(onLocationChange, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onTrackingStateChange, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onRouteChange, RCTDirectEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(onRouteProgressChange, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onError, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onManeuverSizeChange, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(showSpeedLimit, BOOL)
