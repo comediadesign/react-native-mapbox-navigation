@@ -418,7 +418,8 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
   @objc func progressDidChange(_ notification: Notification) {
     guard
       let routeProgress = notification.userInfo?[RouteController.NotificationUserInfoKey.routeProgressKey] as? RouteProgress,
-      let location = notification.userInfo?[RouteController.NotificationUserInfoKey.locationKey] as? CLLocation
+      let location = notification.userInfo?[RouteController.NotificationUserInfoKey.locationKey] as? CLLocation,
+      let roadName = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.roadNameKey] as? String
     else { return }
 
     speedLimitView?.signStandard = notification.userInfo?[PassiveLocationManager.NotificationUserInfoKey.signStandardKey] as? SignStandard
@@ -452,11 +453,11 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
     currentLegIndex = routeProgress.legIndex
 
     onRouteProgressChange?([
-      "distanceTraveled": routeProgress.distanceTraveled ?? 0,
-      "distanceRemaining": routeProgress.distanceRemaining ?? 0,
+      "distanceTraveled": routeProgress.distanceTraveled,
+      "distanceRemaining": routeProgress.distanceRemaining,
       "timeTraveled": 0,
-      "timeRemaining": routeProgress.durationRemaining ?? 0,
-      "progress": routeProgress.fractionTraveled ?? 0
+      "timeRemaining": routeProgress.durationRemaining,
+      "progress": routeProgress.fractionTraveled
     ])
 
     onLocationChange?([
@@ -494,9 +495,9 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
     )
 
     self.onRouteChange?([
-      "distance": navigationService.routeProgress.route?.distance ?? 0,
-      "expectedTravelTime": navigationService.routeProgress.route??.expectedTravelTime ?? 0,
-      "typicalTravelTime": navigationService.routeProgress.route??.typicalTravelTime ?? 0
+      "distance": navigationService.routeProgress.route.distance,
+      "expectedTravelTime": navigationService.routeProgress.route.expectedTravelTime,
+      "typicalTravelTime": navigationService.routeProgress.route.typicalTravelTime ?? 0
     ])
   }
     
@@ -511,9 +512,9 @@ class MapboxNavigationFreeDriveView: UIView, NavigationMapViewDelegate {
     )
 
     self.onRouteChange?([
-      "distance": navigationService.routeProgress.route?.distance ?? 0,
-      "expectedTravelTime": navigationService.routeProgress.route??.expectedTravelTime ?? 0,
-      "typicalTravelTime": navigationService.routeProgress.route??.typicalTravelTime ?? 0
+      "distance": navigationService.routeProgress.route.distance,
+      "expectedTravelTime": navigationService.routeProgress.route.expectedTravelTime,
+      "typicalTravelTime": navigationService.routeProgress.route.typicalTravelTime ?? 0
     ])
   }
 
